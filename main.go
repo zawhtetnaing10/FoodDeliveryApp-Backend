@@ -56,6 +56,8 @@ func main() {
 
 	mux.HandleFunc("POST /register", apiCfg.Register)
 	mux.HandleFunc("POST /login", apiCfg.Login)
+	mux.HandleFunc("POST /forget-password-check-email", apiCfg.CheckEmail)
+	mux.HandleFunc("POST /forget-password", apiCfg.ForgetPassword)
 
 	// New Http Server
 	server := http.Server{
