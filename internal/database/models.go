@@ -8,6 +8,15 @@ import (
 	"time"
 )
 
+type Restaurant struct {
+	ID            int64
+	Name          string
+	ImageUrl      string
+	AverageRating string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
 type User struct {
 	ID             int64
 	Fullname       string
