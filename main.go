@@ -59,7 +59,7 @@ func main() {
 	mux.HandleFunc("POST /forget-password-check-email", apiCfg.CheckEmail)
 	mux.HandleFunc("POST /forget-password", apiCfg.ForgetPassword)
 
-	mux.HandleFunc("GET /get-all-restaurants", apiCfg.GetAllRestaurants)
+	mux.HandleFunc("GET /get-all-restaurants", apiCfg.GetAllRestaurantWithCategories)
 
 	// New Http Server
 	server := http.Server{

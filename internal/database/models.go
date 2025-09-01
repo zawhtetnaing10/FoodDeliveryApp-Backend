@@ -17,6 +17,21 @@ type Restaurant struct {
 	UpdatedAt     time.Time
 }
 
+type RestaurantCategoriesHasRestaurant struct {
+	ID                   int64
+	RestaurantCategoryID int64
+	RestaurantID         int64
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+type RestaurantCategory struct {
+	ID        int64
+	Name      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type User struct {
 	ID             int64
 	Fullname       string

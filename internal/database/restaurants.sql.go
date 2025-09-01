@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 )
 
 const getAllRestaurants = `-- name: GetAllRestaurants :many
@@ -29,6 +30,71 @@ func (q *Queries) GetAllRestaurants(ctx context.Context) ([]Restaurant, error) {
 			&i.AverageRating,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllRestaurantsWithCategories = `-- name: GetAllRestaurantsWithCategories :many
+SELECT restaurants.id as restaurant_id,
+restaurants.name as restaurant_name,
+restaurants.image_url as restaurant_image_url,
+restaurants.average_rating as restaurant_average_rating,
+restaurants.created_at as restaurant_created_at,
+restaurants.updated_at as restaurant_updated_at,
+restaurant_categories.id as restaurant_category_id,
+restaurant_categories.name as restaurant_category_name,
+restaurant_categories.created_at as restaurant_category_created_at,
+restaurant_categories.updated_at as restaurant_category_updated_at 
+FROM restaurants 
+INNER JOIN restaurant_categories_has_restaurants
+ON restaurants.id = restaurant_categories_has_restaurants.restaurant_id
+INNER JOIN restaurant_categories
+ON restaurant_categories.id = restaurant_categories_has_restaurants.restaurant_category_id
+`
+
+type GetAllRestaurantsWithCategoriesRow struct {
+	RestaurantID                int64
+	RestaurantName              string
+	RestaurantImageUrl          string
+	RestaurantAverageRating     string
+	RestaurantCreatedAt         time.Time
+	RestaurantUpdatedAt         time.Time
+	RestaurantCategoryID        int64
+	RestaurantCategoryName      string
+	RestaurantCategoryCreatedAt time.Time
+	RestaurantCategoryUpdatedAt time.Time
+}
+
+func (q *Queries) GetAllRestaurantsWithCategories(ctx context.Context) ([]GetAllRestaurantsWithCategoriesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllRestaurantsWithCategories)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllRestaurantsWithCategoriesRow
+	for rows.Next() {
+		var i GetAllRestaurantsWithCategoriesRow
+		if err := rows.Scan(
+			&i.RestaurantID,
+			&i.RestaurantName,
+			&i.RestaurantImageUrl,
+			&i.RestaurantAverageRating,
+			&i.RestaurantCreatedAt,
+			&i.RestaurantUpdatedAt,
+			&i.RestaurantCategoryID,
+			&i.RestaurantCategoryName,
+			&i.RestaurantCategoryCreatedAt,
+			&i.RestaurantCategoryUpdatedAt,
 		); err != nil {
 			return nil, err
 		}
