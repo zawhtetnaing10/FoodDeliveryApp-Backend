@@ -60,6 +60,7 @@ func main() {
 	mux.HandleFunc("POST /forget-password", apiCfg.ForgetPassword)
 
 	mux.HandleFunc("GET /get-all-restaurants", apiCfg.GetAllRestaurantWithCategories)
+	mux.HandleFunc("GET /get-restaurant-details/{restaurant_id}", apiCfg.GetRestaurantDetails)
 
 	// New Http Server
 	server := http.Server{

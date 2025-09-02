@@ -8,6 +8,25 @@ import (
 	"time"
 )
 
+type FoodCategory struct {
+	ID        int64
+	Name      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type FoodItem struct {
+	ID             int64
+	Name           string
+	ImageUrl       string
+	Description    string
+	Price          string
+	RestaurantID   int64
+	FoodCategoryID int64
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
 type Restaurant struct {
 	ID            int64
 	Name          string

@@ -108,3 +108,90 @@ func (q *Queries) GetAllRestaurantsWithCategories(ctx context.Context) ([]GetAll
 	}
 	return items, nil
 }
+
+const getResturantWithFoodCategoryAndFoodItems = `-- name: GetResturantWithFoodCategoryAndFoodItems :many
+SELECT r.id as restaurant_id, 
+    r.name as restaurant_name,
+    r.image_url as restaurant_image_url,
+    r.average_rating as restaurant_average_rating, 
+    r.created_at as restaurant_created_at,
+    r.updated_at as restaurant_updated_at,
+    fi.id as food_item_id, 
+    fi.name as food_item_name, 
+    fi.image_url as food_item_image_url,
+    fi.description as food_item_description,
+    fi.price as food_item_price,
+    fi.created_at as food_item_created_at,
+    fi.updated_at as food_item_updated_at,
+    fc.id as food_category_id, 
+    fc.name as food_category_name,
+    fc.created_at as food_category_created_at,
+    fc.updated_at as food_category_updated_at
+FROM restaurants r
+INNER JOIN food_items fi
+ON r.id = fi.restaurant_id
+INNER JOIN food_categories fc
+ON fc.id = fi.food_category_id
+WHERE r.id = $1
+`
+
+type GetResturantWithFoodCategoryAndFoodItemsRow struct {
+	RestaurantID            int64
+	RestaurantName          string
+	RestaurantImageUrl      string
+	RestaurantAverageRating string
+	RestaurantCreatedAt     time.Time
+	RestaurantUpdatedAt     time.Time
+	FoodItemID              int64
+	FoodItemName            string
+	FoodItemImageUrl        string
+	FoodItemDescription     string
+	FoodItemPrice           string
+	FoodItemCreatedAt       time.Time
+	FoodItemUpdatedAt       time.Time
+	FoodCategoryID          int64
+	FoodCategoryName        string
+	FoodCategoryCreatedAt   time.Time
+	FoodCategoryUpdatedAt   time.Time
+}
+
+func (q *Queries) GetResturantWithFoodCategoryAndFoodItems(ctx context.Context, id int64) ([]GetResturantWithFoodCategoryAndFoodItemsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getResturantWithFoodCategoryAndFoodItems, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetResturantWithFoodCategoryAndFoodItemsRow
+	for rows.Next() {
+		var i GetResturantWithFoodCategoryAndFoodItemsRow
+		if err := rows.Scan(
+			&i.RestaurantID,
+			&i.RestaurantName,
+			&i.RestaurantImageUrl,
+			&i.RestaurantAverageRating,
+			&i.RestaurantCreatedAt,
+			&i.RestaurantUpdatedAt,
+			&i.FoodItemID,
+			&i.FoodItemName,
+			&i.FoodItemImageUrl,
+			&i.FoodItemDescription,
+			&i.FoodItemPrice,
+			&i.FoodItemCreatedAt,
+			&i.FoodItemUpdatedAt,
+			&i.FoodCategoryID,
+			&i.FoodCategoryName,
+			&i.FoodCategoryCreatedAt,
+			&i.FoodCategoryUpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
