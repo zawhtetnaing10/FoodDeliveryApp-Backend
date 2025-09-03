@@ -54,13 +54,16 @@ func main() {
 	// New Mux
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /register", apiCfg.Register)
-	mux.HandleFunc("POST /login", apiCfg.Login)
-	mux.HandleFunc("POST /forget-password-check-email", apiCfg.CheckEmail)
-	mux.HandleFunc("POST /forget-password", apiCfg.ForgetPassword)
+	mux.HandleFunc("POST /api/register", apiCfg.Register)
+	mux.HandleFunc("POST /api/login", apiCfg.Login)
+	mux.HandleFunc("POST /api/forget-password-check-email", apiCfg.CheckEmail)
+	mux.HandleFunc("POST /api/forget-password", apiCfg.ForgetPassword)
 
-	mux.HandleFunc("GET /get-all-restaurants", apiCfg.GetAllRestaurantWithCategories)
-	mux.HandleFunc("GET /get-restaurant-details/{restaurant_id}", apiCfg.GetRestaurantDetails)
+	mux.HandleFunc("GET /api/get-all-restaurants", apiCfg.GetAllRestaurantWithCategories)
+	mux.HandleFunc("GET /api/get-restaurant-details/{restaurant_id}", apiCfg.GetRestaurantDetails)
+
+	mux.HandleFunc("POST /api/add-delivery-address-and-payment-method", apiCfg.AddDeliveryAddressAndPaymentMethod)
+	mux.HandleFunc("GET /api/get-delivery-addresses-and-payment-methods", apiCfg.GetDeliveryAddressAndPaymentMethodForUser)
 
 	// New Http Server
 	server := http.Server{

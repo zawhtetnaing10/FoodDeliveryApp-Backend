@@ -5,8 +5,17 @@
 package database
 
 import (
+	"database/sql"
 	"time"
 )
+
+type DeliveryAddress struct {
+	ID            int64
+	StreetAddress string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	UserID        sql.NullInt64
+}
 
 type FoodCategory struct {
 	ID        int64
@@ -25,6 +34,17 @@ type FoodItem struct {
 	FoodCategoryID int64
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
+}
+
+type PaymentMethod struct {
+	ID         int64
+	CardNumber string
+	ExpiryDate string
+	Cvv        int32
+	NameOnCard string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	UserID     sql.NullInt64
 }
 
 type Restaurant struct {
