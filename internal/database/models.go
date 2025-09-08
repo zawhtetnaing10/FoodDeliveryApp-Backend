@@ -5,23 +5,22 @@
 package database
 
 import (
-	"database/sql"
-	"time"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type DeliveryAddress struct {
 	ID            int64
 	StreetAddress string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	UserID        sql.NullInt64
+	CreatedAt     pgtype.Timestamp
+	UpdatedAt     pgtype.Timestamp
+	UserID        pgtype.Int8
 }
 
 type FoodCategory struct {
 	ID        int64
 	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt pgtype.Timestamp
+	UpdatedAt pgtype.Timestamp
 }
 
 type FoodItem struct {
@@ -29,11 +28,31 @@ type FoodItem struct {
 	Name           string
 	ImageUrl       string
 	Description    string
-	Price          string
+	Price          pgtype.Numeric
 	RestaurantID   int64
 	FoodCategoryID int64
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	CreatedAt      pgtype.Timestamp
+	UpdatedAt      pgtype.Timestamp
+}
+
+type FoodItemsHasOrder struct {
+	ID         int64
+	FoodItemID int64
+	OrderID    int64
+	Quantity   int32
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+}
+
+type Order struct {
+	ID                int64
+	TotalCost         pgtype.Numeric
+	OrderNumber       string
+	UserID            pgtype.Int8
+	DeliveryAddressID pgtype.Int8
+	PaymentMethodID   pgtype.Int8
+	CreatedAt         pgtype.Timestamp
+	UpdatedAt         pgtype.Timestamp
 }
 
 type PaymentMethod struct {
@@ -42,33 +61,33 @@ type PaymentMethod struct {
 	ExpiryDate string
 	Cvv        int32
 	NameOnCard string
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	UserID     sql.NullInt64
+	CreatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamp
+	UserID     pgtype.Int8
 }
 
 type Restaurant struct {
 	ID            int64
 	Name          string
 	ImageUrl      string
-	AverageRating string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	AverageRating pgtype.Numeric
+	CreatedAt     pgtype.Timestamp
+	UpdatedAt     pgtype.Timestamp
 }
 
 type RestaurantCategoriesHasRestaurant struct {
 	ID                   int64
 	RestaurantCategoryID int64
 	RestaurantID         int64
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
+	CreatedAt            pgtype.Timestamp
+	UpdatedAt            pgtype.Timestamp
 }
 
 type RestaurantCategory struct {
 	ID        int64
 	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt pgtype.Timestamp
+	UpdatedAt pgtype.Timestamp
 }
 
 type User struct {
@@ -76,6 +95,7 @@ type User struct {
 	Fullname       string
 	Email          string
 	Hashedpassword string
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	CreatedAt      pgtype.Timestamp
+	UpdatedAt      pgtype.Timestamp
+	DeletedAt      pgtype.Timestamp
 }

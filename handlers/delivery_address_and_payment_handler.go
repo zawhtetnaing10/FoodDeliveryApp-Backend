@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/zawhtetnaing10/FoodDeliveryApp-Backend/internal/database"
 )
 
@@ -86,7 +86,7 @@ func (cfg *ApiConfig) AddDeliveryAddressAndPaymentMethod(w http.ResponseWriter, 
 		ExpiryDate: request.PaymentMethod.ExpiryDate,
 		Cvv:        int32(request.PaymentMethod.CVV),
 		NameOnCard: request.PaymentMethod.NameOnCard,
-		UserID: sql.NullInt64{
+		UserID: pgtype.Int8{
 			Int64: user_id,
 			Valid: true,
 		},
@@ -103,14 +103,14 @@ func (cfg *ApiConfig) AddDeliveryAddressAndPaymentMethod(w http.ResponseWriter, 
 		ExpiryDate: paymentMethodDb.ExpiryDate,
 		CVV:        int(paymentMethodDb.Cvv),
 		NameOnCard: paymentMethodDb.NameOnCard,
-		CreatedAt:  paymentMethodDb.CreatedAt,
-		UpdatedAt:  paymentMethodDb.UpdatedAt,
+		CreatedAt:  paymentMethodDb.CreatedAt.Time,
+		UpdatedAt:  paymentMethodDb.UpdatedAt.Time,
 	}
 
 	// Add the delivery address
 	deliveryAddressParams := database.CreateDeliveryAddressParams{
 		StreetAddress: request.DeliveryAddress.StreetAddress,
-		UserID: sql.NullInt64{
+		UserID: pgtype.Int8{
 			Int64: user_id,
 			Valid: true,
 		},
@@ -124,8 +124,8 @@ func (cfg *ApiConfig) AddDeliveryAddressAndPaymentMethod(w http.ResponseWriter, 
 	deliveryAddressResponse := deliveryAddressResponse{
 		Id:            deliveryAddressDb.ID,
 		StreetAddress: deliveryAddressDb.StreetAddress,
-		CreatedAt:     deliveryAddressDb.CreatedAt,
-		UpdatedAt:     deliveryAddressDb.UpdatedAt,
+		CreatedAt:     deliveryAddressDb.CreatedAt.Time,
+		UpdatedAt:     deliveryAddressDb.UpdatedAt.Time,
 	}
 
 	// Build the response
@@ -154,7 +154,7 @@ func (cfg *ApiConfig) GetDeliveryAddressAndPaymentMethodForUser(w http.ResponseW
 	}
 
 	// Get Delivery Addresses
-	deliveryAddressesDb, getDelAddErr := cfg.Db.GetDeliveryAddressesForUser(r.Context(), sql.NullInt64{Int64: user_id, Valid: true})
+	deliveryAddressesDb, getDelAddErr := cfg.Db.GetDeliveryAddressesForUser(r.Context(), pgtype.Int8{Int64: user_id, Valid: true})
 	if getDelAddErr != nil {
 		cfg.LogError("Failed to get delivery addresses for user", getDelAddErr)
 		RespondWithError(w, http.StatusInternalServerError, "Failed to get delivery addresses.")
@@ -165,14 +165,14 @@ func (cfg *ApiConfig) GetDeliveryAddressAndPaymentMethodForUser(w http.ResponseW
 		deliveryAddressResponse := deliveryAddressResponse{
 			Id:            addressDb.ID,
 			StreetAddress: addressDb.StreetAddress,
-			CreatedAt:     addressDb.CreatedAt,
-			UpdatedAt:     addressDb.UpdatedAt,
+			CreatedAt:     addressDb.CreatedAt.Time,
+			UpdatedAt:     addressDb.UpdatedAt.Time,
 		}
 		deliveryAddresses = append(deliveryAddresses, deliveryAddressResponse)
 	}
 
 	// Get Payment Methods
-	paymentMethodsDb, getPaymentMethodsErr := cfg.Db.GetPaymentMethodsByUser(r.Context(), sql.NullInt64{Int64: user_id, Valid: true})
+	paymentMethodsDb, getPaymentMethodsErr := cfg.Db.GetPaymentMethodsByUser(r.Context(), pgtype.Int8{Int64: user_id, Valid: true})
 	if getPaymentMethodsErr != nil {
 		cfg.LogError("Failed to get payment methods for user", getPaymentMethodsErr)
 		RespondWithError(w, http.StatusInternalServerError, "Failed to get payment methods.")
@@ -186,8 +186,8 @@ func (cfg *ApiConfig) GetDeliveryAddressAndPaymentMethodForUser(w http.ResponseW
 			ExpiryDate: paymentMethodDb.ExpiryDate,
 			CVV:        int(paymentMethodDb.Cvv),
 			NameOnCard: paymentMethodDb.NameOnCard,
-			CreatedAt:  paymentMethodDb.CreatedAt,
-			UpdatedAt:  paymentMethodDb.UpdatedAt,
+			CreatedAt:  paymentMethodDb.CreatedAt.Time,
+			UpdatedAt:  paymentMethodDb.UpdatedAt.Time,
 		}
 		paymentMethods = append(paymentMethods, paymentMethodResponse)
 	}

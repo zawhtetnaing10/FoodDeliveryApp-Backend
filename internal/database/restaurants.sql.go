@@ -7,7 +7,8 @@ package database
 
 import (
 	"context"
-	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getAllRestaurants = `-- name: GetAllRestaurants :many
@@ -15,7 +16,7 @@ SELECT id, name, image_url, average_rating, created_at, updated_at FROM restaura
 `
 
 func (q *Queries) GetAllRestaurants(ctx context.Context) ([]Restaurant, error) {
-	rows, err := q.db.QueryContext(ctx, getAllRestaurants)
+	rows, err := q.db.Query(ctx, getAllRestaurants)
 	if err != nil {
 		return nil, err
 	}
@@ -34,9 +35,6 @@ func (q *Queries) GetAllRestaurants(ctx context.Context) ([]Restaurant, error) {
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -66,17 +64,17 @@ type GetAllRestaurantsWithCategoriesRow struct {
 	RestaurantID                int64
 	RestaurantName              string
 	RestaurantImageUrl          string
-	RestaurantAverageRating     string
-	RestaurantCreatedAt         time.Time
-	RestaurantUpdatedAt         time.Time
+	RestaurantAverageRating     pgtype.Numeric
+	RestaurantCreatedAt         pgtype.Timestamp
+	RestaurantUpdatedAt         pgtype.Timestamp
 	RestaurantCategoryID        int64
 	RestaurantCategoryName      string
-	RestaurantCategoryCreatedAt time.Time
-	RestaurantCategoryUpdatedAt time.Time
+	RestaurantCategoryCreatedAt pgtype.Timestamp
+	RestaurantCategoryUpdatedAt pgtype.Timestamp
 }
 
 func (q *Queries) GetAllRestaurantsWithCategories(ctx context.Context) ([]GetAllRestaurantsWithCategoriesRow, error) {
-	rows, err := q.db.QueryContext(ctx, getAllRestaurantsWithCategories)
+	rows, err := q.db.Query(ctx, getAllRestaurantsWithCategories)
 	if err != nil {
 		return nil, err
 	}
@@ -99,9 +97,6 @@ func (q *Queries) GetAllRestaurantsWithCategories(ctx context.Context) ([]GetAll
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -139,24 +134,24 @@ type GetResturantWithFoodCategoryAndFoodItemsRow struct {
 	RestaurantID            int64
 	RestaurantName          string
 	RestaurantImageUrl      string
-	RestaurantAverageRating string
-	RestaurantCreatedAt     time.Time
-	RestaurantUpdatedAt     time.Time
+	RestaurantAverageRating pgtype.Numeric
+	RestaurantCreatedAt     pgtype.Timestamp
+	RestaurantUpdatedAt     pgtype.Timestamp
 	FoodItemID              int64
 	FoodItemName            string
 	FoodItemImageUrl        string
 	FoodItemDescription     string
-	FoodItemPrice           string
-	FoodItemCreatedAt       time.Time
-	FoodItemUpdatedAt       time.Time
+	FoodItemPrice           pgtype.Numeric
+	FoodItemCreatedAt       pgtype.Timestamp
+	FoodItemUpdatedAt       pgtype.Timestamp
 	FoodCategoryID          int64
 	FoodCategoryName        string
-	FoodCategoryCreatedAt   time.Time
-	FoodCategoryUpdatedAt   time.Time
+	FoodCategoryCreatedAt   pgtype.Timestamp
+	FoodCategoryUpdatedAt   pgtype.Timestamp
 }
 
 func (q *Queries) GetResturantWithFoodCategoryAndFoodItems(ctx context.Context, id int64) ([]GetResturantWithFoodCategoryAndFoodItemsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getResturantWithFoodCategoryAndFoodItems, id)
+	rows, err := q.db.Query(ctx, getResturantWithFoodCategoryAndFoodItems, id)
 	if err != nil {
 		return nil, err
 	}
@@ -186,9 +181,6 @@ func (q *Queries) GetResturantWithFoodCategoryAndFoodItems(ctx context.Context, 
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

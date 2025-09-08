@@ -102,8 +102,8 @@ func (cfg *ApiConfig) Register(w http.ResponseWriter, request *http.Request) {
 		Id:          createdUser.ID,
 		Email:       createdUser.Email,
 		Fullname:    createdUser.Fullname,
-		CreatedAt:   createdUser.CreatedAt,
-		UpdatedAt:   createdUser.UpdatedAt,
+		CreatedAt:   createdUser.CreatedAt.Time,
+		UpdatedAt:   createdUser.UpdatedAt.Time,
 		AccessToken: jwtToken,
 	}
 
@@ -154,8 +154,8 @@ func (cfg *ApiConfig) Login(w http.ResponseWriter, request *http.Request) {
 		Id:          userFromDb.ID,
 		Email:       userFromDb.Email,
 		Fullname:    userFromDb.Fullname,
-		CreatedAt:   userFromDb.CreatedAt,
-		UpdatedAt:   userFromDb.UpdatedAt,
+		CreatedAt:   userFromDb.CreatedAt.Time,
+		UpdatedAt:   userFromDb.UpdatedAt.Time,
 		AccessToken: jwtToken,
 	}
 
@@ -199,8 +199,8 @@ func (cfg *ApiConfig) CheckEmail(w http.ResponseWriter, request *http.Request) {
 		Id:        userFromDb.ID,
 		Email:     userFromDb.Email,
 		Fullname:  userFromDb.Fullname,
-		CreatedAt: userFromDb.CreatedAt,
-		UpdatedAt: userFromDb.UpdatedAt,
+		CreatedAt: userFromDb.CreatedAt.Time,
+		UpdatedAt: userFromDb.UpdatedAt.Time,
 	}
 
 	response := forgetPasswordCheckEmailResponse{

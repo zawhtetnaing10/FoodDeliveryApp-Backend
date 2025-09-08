@@ -7,7 +7,8 @@ package database
 
 import (
 	"context"
-	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createDeliveryAddress = `-- name: CreateDeliveryAddress :one
@@ -23,11 +24,11 @@ RETURNING id, street_address, created_at, updated_at, user_id
 
 type CreateDeliveryAddressParams struct {
 	StreetAddress string
-	UserID        sql.NullInt64
+	UserID        pgtype.Int8
 }
 
 func (q *Queries) CreateDeliveryAddress(ctx context.Context, arg CreateDeliveryAddressParams) (DeliveryAddress, error) {
-	row := q.db.QueryRowContext(ctx, createDeliveryAddress, arg.StreetAddress, arg.UserID)
+	row := q.db.QueryRow(ctx, createDeliveryAddress, arg.StreetAddress, arg.UserID)
 	var i DeliveryAddress
 	err := row.Scan(
 		&i.ID,
@@ -44,8 +45,8 @@ SELECT id, street_address, created_at, updated_at, user_id FROM delivery_address
 WHERE user_id = $1
 `
 
-func (q *Queries) GetDeliveryAddressesForUser(ctx context.Context, userID sql.NullInt64) ([]DeliveryAddress, error) {
-	rows, err := q.db.QueryContext(ctx, getDeliveryAddressesForUser, userID)
+func (q *Queries) GetDeliveryAddressesForUser(ctx context.Context, userID pgtype.Int8) ([]DeliveryAddress, error) {
+	rows, err := q.db.Query(ctx, getDeliveryAddressesForUser, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -63,9 +64,6 @@ func (q *Queries) GetDeliveryAddressesForUser(ctx context.Context, userID sql.Nu
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

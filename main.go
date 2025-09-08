@@ -1,11 +1,12 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"net/http"
 	"os"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/zawhtetnaing10/FoodDeliveryApp-Backend/handlers"
 	"go.uber.org/zap"
 
@@ -22,18 +23,30 @@ func main() {
 	dbUrl := os.Getenv("DB_URL")
 
 	// Open DB Connection
-	db, err := sql.Open("postgres", dbUrl)
+	// db, err := sql.Open("postgres", dbUrl)
+	// if err != nil {
+	// 	fmt.Printf("DB connection error %v", err)
+	// 	os.Exit(1)
+	// }
+	// defer db.Close()
+
+	// Connect to DB
+	pool, err := pgxpool.New(context.Background(), dbUrl)
 	if err != nil {
-		fmt.Printf("DB connection error %v", err)
+		fmt.Printf("Unable to connect to db %w", err)
 		os.Exit(1)
 	}
-	defer db.Close()
+	defer pool.Close()
 
-	pingErr := db.Ping()
+	// Ping the connection
+	pingErr := pool.Ping(context.Background())
 	if pingErr != nil {
 		fmt.Printf("DB ping error %v", pingErr)
 		os.Exit(1)
 	}
+
+	// Create db queries instance
+	Db := database.New(pool)
 
 	fmt.Printf("Successfully connected to database.")
 
@@ -45,7 +58,8 @@ func main() {
 
 	// Config file
 	apiCfg := handlers.ApiConfig{
-		Db:          database.New(db),
+		Pool:        pool,
+		Db:          Db,
 		Platform:    os.Getenv("PLATFORM"),
 		TokenSecret: os.Getenv("TOKEN_SECRET"),
 		Logger:      logger,

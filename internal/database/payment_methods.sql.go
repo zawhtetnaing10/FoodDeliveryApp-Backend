@@ -7,7 +7,8 @@ package database
 
 import (
 	"context"
-	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createPaymentMethod = `-- name: CreatePaymentMethod :one
@@ -29,11 +30,11 @@ type CreatePaymentMethodParams struct {
 	ExpiryDate string
 	Cvv        int32
 	NameOnCard string
-	UserID     sql.NullInt64
+	UserID     pgtype.Int8
 }
 
 func (q *Queries) CreatePaymentMethod(ctx context.Context, arg CreatePaymentMethodParams) (PaymentMethod, error) {
-	row := q.db.QueryRowContext(ctx, createPaymentMethod,
+	row := q.db.QueryRow(ctx, createPaymentMethod,
 		arg.CardNumber,
 		arg.ExpiryDate,
 		arg.Cvv,
@@ -59,8 +60,8 @@ SELECT id, card_number, expiry_date, cvv, name_on_card, created_at, updated_at, 
 WHERE user_id = $1
 `
 
-func (q *Queries) GetPaymentMethodsByUser(ctx context.Context, userID sql.NullInt64) ([]PaymentMethod, error) {
-	rows, err := q.db.QueryContext(ctx, getPaymentMethodsByUser, userID)
+func (q *Queries) GetPaymentMethodsByUser(ctx context.Context, userID pgtype.Int8) ([]PaymentMethod, error) {
+	rows, err := q.db.Query(ctx, getPaymentMethodsByUser, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -81,9 +82,6 @@ func (q *Queries) GetPaymentMethodsByUser(ctx context.Context, userID sql.NullIn
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

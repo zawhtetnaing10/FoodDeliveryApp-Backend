@@ -86,7 +86,7 @@ func (cfg *ApiConfig) GetAllRestaurantWithCategories(w http.ResponseWriter, r *h
 		if !ok {
 			// Doesn't exist yet
 			// Create new restaurant object
-			avgRating, parseErr := strconv.ParseFloat(restaurantDb.RestaurantAverageRating, 64)
+			avgRating, parseErr := restaurantDb.RestaurantAverageRating.Float64Value()
 			if parseErr != nil {
 				cfg.LogError(fmt.Sprintf("Cannot parse average rating: %v", restaurantDb.RestaurantAverageRating), parseErr)
 				RespondWithError(w, http.StatusInternalServerError, "There was something wrong while fetching the restaurants. Please try again.")
@@ -96,15 +96,15 @@ func (cfg *ApiConfig) GetAllRestaurantWithCategories(w http.ResponseWriter, r *h
 				Id:            restaurantDb.RestaurantID,
 				Name:          restaurantDb.RestaurantName,
 				ImageUrl:      restaurantDb.RestaurantImageUrl,
-				AverageRating: avgRating,
-				CreatedAt:     restaurantDb.RestaurantCreatedAt,
-				UpdatedAt:     restaurantDb.RestaurantUpdatedAt,
+				AverageRating: avgRating.Float64,
+				CreatedAt:     restaurantDb.RestaurantCreatedAt.Time,
+				UpdatedAt:     restaurantDb.RestaurantUpdatedAt.Time,
 				Categories: []categoryResponse{
 					{
 						Id:        restaurantDb.RestaurantCategoryID,
 						Name:      restaurantDb.RestaurantCategoryName,
-						CreatedAt: restaurantDb.RestaurantCategoryCreatedAt,
-						UpdatedAt: restaurantDb.RestaurantCategoryUpdatedAt,
+						CreatedAt: restaurantDb.RestaurantCategoryCreatedAt.Time,
+						UpdatedAt: restaurantDb.RestaurantCategoryUpdatedAt.Time,
 					},
 				},
 			}
@@ -118,8 +118,8 @@ func (cfg *ApiConfig) GetAllRestaurantWithCategories(w http.ResponseWriter, r *h
 			newCategory := categoryResponse{
 				Id:        restaurantDb.RestaurantCategoryID,
 				Name:      restaurantDb.RestaurantCategoryName,
-				CreatedAt: restaurantDb.RestaurantCategoryCreatedAt,
-				UpdatedAt: restaurantDb.RestaurantCategoryUpdatedAt,
+				CreatedAt: restaurantDb.RestaurantCategoryCreatedAt.Time,
+				UpdatedAt: restaurantDb.RestaurantCategoryUpdatedAt.Time,
 			}
 
 			restaurant.Categories = append(restaurant.Categories, newCategory)
@@ -168,7 +168,7 @@ func (cfg *ApiConfig) GetRestaurantDetails(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	resRating, parseErr := strconv.ParseFloat(dbResult[0].RestaurantAverageRating, 64)
+	resRating, parseErr := dbResult[0].RestaurantAverageRating.Float64Value()
 	if parseErr != nil {
 		cfg.LogError("Error parsing average rating", parseErr)
 		RespondWithError(w, http.StatusInternalServerError, "Failed to fetch restaurant details")
@@ -180,9 +180,9 @@ func (cfg *ApiConfig) GetRestaurantDetails(w http.ResponseWriter, r *http.Reques
 		Id:            dbResult[0].RestaurantID,
 		Name:          dbResult[0].RestaurantName,
 		ImageUrl:      dbResult[0].RestaurantImageUrl,
-		AverageRating: resRating,
-		CreatedAt:     dbResult[0].RestaurantCreatedAt,
-		UpdatedAt:     dbResult[0].RestaurantUpdatedAt,
+		AverageRating: resRating.Float64,
+		CreatedAt:     dbResult[0].RestaurantCreatedAt.Time,
+		UpdatedAt:     dbResult[0].RestaurantUpdatedAt.Time,
 	}
 
 	foodCategoriesMap := map[int64]*foodCategoryResponse{}
@@ -193,7 +193,7 @@ func (cfg *ApiConfig) GetRestaurantDetails(w http.ResponseWriter, r *http.Reques
 		foodCategory, ok := foodCategoriesMap[singleDbResult.FoodCategoryID]
 
 		// Parse food item price
-		foodItemPrice, parseErr := strconv.ParseFloat(singleDbResult.FoodItemPrice, 64)
+		foodItemPrice, parseErr := singleDbResult.FoodItemPrice.Float64Value()
 		if parseErr != nil {
 			cfg.LogError("Error parsing food item price", parseErr)
 			RespondWithError(w, http.StatusInternalServerError, "Failed to fetch restaurant details")
@@ -205,17 +205,17 @@ func (cfg *ApiConfig) GetRestaurantDetails(w http.ResponseWriter, r *http.Reques
 			newFoodCategory := foodCategoryResponse{
 				Id:        singleDbResult.FoodCategoryID,
 				Name:      singleDbResult.FoodCategoryName,
-				CreatedAt: singleDbResult.FoodCategoryCreatedAt,
-				UpdatedAt: singleDbResult.FoodCategoryUpdatedAt,
+				CreatedAt: singleDbResult.FoodCategoryCreatedAt.Time,
+				UpdatedAt: singleDbResult.FoodCategoryUpdatedAt.Time,
 				FoodItems: []foodItemResponse{
 					{
 						Id:          singleDbResult.FoodItemID,
 						Name:        singleDbResult.FoodItemName,
 						ImageUrl:    singleDbResult.FoodItemImageUrl,
 						Description: singleDbResult.FoodItemDescription,
-						Price:       foodItemPrice,
-						CreatedAt:   singleDbResult.FoodItemCreatedAt,
-						UpdatedAt:   singleDbResult.FoodItemUpdatedAt,
+						Price:       foodItemPrice.Float64,
+						CreatedAt:   singleDbResult.FoodItemCreatedAt.Time,
+						UpdatedAt:   singleDbResult.FoodItemUpdatedAt.Time,
 					},
 				},
 			}
@@ -231,9 +231,9 @@ func (cfg *ApiConfig) GetRestaurantDetails(w http.ResponseWriter, r *http.Reques
 				Name:        singleDbResult.FoodItemName,
 				ImageUrl:    singleDbResult.FoodItemImageUrl,
 				Description: singleDbResult.FoodItemDescription,
-				Price:       foodItemPrice,
-				CreatedAt:   singleDbResult.FoodItemCreatedAt,
-				UpdatedAt:   singleDbResult.FoodItemUpdatedAt,
+				Price:       foodItemPrice.Float64,
+				CreatedAt:   singleDbResult.FoodItemCreatedAt.Time,
+				UpdatedAt:   singleDbResult.FoodItemUpdatedAt.Time,
 			}
 			foodCategory.FoodItems = append(foodCategory.FoodItems, newFoodItem)
 		}

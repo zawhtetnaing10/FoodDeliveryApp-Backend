@@ -5,7 +5,8 @@ CREATE TABLE users(
     email TEXT UNIQUE NOT NULL,
     hashedPassword TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
+    updated_at TIMESTAMP NOT NULL,
+    deleted_at TIMESTAMP
 );
 
 -- +goose Down

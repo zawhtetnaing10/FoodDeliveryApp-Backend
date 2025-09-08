@@ -18,7 +18,7 @@ VALUES(
     NOW() AT TIME ZONE 'UTC',
     NOW() AT TIME ZONE 'UTC'
 )
-RETURNING id, fullname, email, hashedpassword, created_at, updated_at
+RETURNING id, fullname, email, hashedpassword, created_at, updated_at, deleted_at
 `
 
 type CreateUserParams struct {
@@ -28,7 +28,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.Fullname, arg.Email, arg.Hashedpassword)
+	row := q.db.QueryRow(ctx, createUser, arg.Fullname, arg.Email, arg.Hashedpassword)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -37,18 +37,19 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Hashedpassword,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, fullname, email, hashedpassword, created_at, updated_at FROM users
+SELECT id, fullname, email, hashedpassword, created_at, updated_at, deleted_at FROM users
 WHERE email = $1 
 LIMIT 1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -57,6 +58,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Hashedpassword,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
@@ -65,7 +67,7 @@ const updatePassword = `-- name: UpdatePassword :one
 UPDATE users
 SET hashedPassword = $1
 WHERE email = $2
-RETURNING id, fullname, email, hashedpassword, created_at, updated_at
+RETURNING id, fullname, email, hashedpassword, created_at, updated_at, deleted_at
 `
 
 type UpdatePasswordParams struct {
@@ -74,7 +76,7 @@ type UpdatePasswordParams struct {
 }
 
 func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updatePassword, arg.Hashedpassword, arg.Email)
+	row := q.db.QueryRow(ctx, updatePassword, arg.Hashedpassword, arg.Email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -83,6 +85,7 @@ func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) 
 		&i.Hashedpassword,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
