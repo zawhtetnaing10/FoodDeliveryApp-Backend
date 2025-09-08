@@ -22,18 +22,10 @@ func main() {
 
 	dbUrl := os.Getenv("DB_URL")
 
-	// Open DB Connection
-	// db, err := sql.Open("postgres", dbUrl)
-	// if err != nil {
-	// 	fmt.Printf("DB connection error %v", err)
-	// 	os.Exit(1)
-	// }
-	// defer db.Close()
-
 	// Connect to DB
 	pool, err := pgxpool.New(context.Background(), dbUrl)
 	if err != nil {
-		fmt.Printf("Unable to connect to db %w", err)
+		fmt.Printf("Unable to connect to db %v", err)
 		os.Exit(1)
 	}
 	defer pool.Close()
@@ -78,6 +70,8 @@ func main() {
 
 	mux.HandleFunc("POST /api/add-delivery-address-and-payment-method", apiCfg.AddDeliveryAddressAndPaymentMethod)
 	mux.HandleFunc("GET /api/get-delivery-addresses-and-payment-methods", apiCfg.GetDeliveryAddressAndPaymentMethodForUser)
+
+	mux.HandleFunc("POST /api/submit-order", apiCfg.SubmitOrder)
 
 	// New Http Server
 	server := http.Server{
