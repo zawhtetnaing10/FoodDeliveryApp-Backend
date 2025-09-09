@@ -11,6 +11,24 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const calculateTotalCost = `-- name: CalculateTotalCost :one
+SELECT SUM(f.price * t.quantity)::numeric
+FROM food_items AS f
+CROSS JOIN LATERAL
+    jsonb_to_recordset(
+        $1::jsonb
+    ) AS t(id INT, quantity INT)
+WHERE 
+f.id = t.id
+`
+
+func (q *Queries) CalculateTotalCost(ctx context.Context, items []byte) (pgtype.Numeric, error) {
+	row := q.db.QueryRow(ctx, calculateTotalCost, items)
+	var column_1 pgtype.Numeric
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
 const createOrder = `-- name: CreateOrder :one
 INSERT INTO orders(user_id, delivery_address_id, payment_method_id, total_cost, order_number, created_at, updated_at)
 VALUES(

@@ -10,3 +10,13 @@ VALUES(
     NOW() AT TIME ZONE 'UTC'
 )
 RETURNING *;
+
+-- name: CalculateTotalCost :one
+SELECT SUM(f.price * t.quantity)::numeric
+FROM food_items AS f
+CROSS JOIN LATERAL
+    jsonb_to_recordset(
+        sqlc.arg(items)::jsonb
+    ) AS t(id INT, quantity INT)
+WHERE 
+f.id = t.id;

@@ -13,7 +13,6 @@ import (
 
 // TODO: - Calculate total cost manually
 type OrderRequest struct {
-	TotalCost         float64           `json:"total_cost"`
 	PaymentMethodId   int64             `json:"payment_method_id"`
 	DeliveryAddressId int64             `json:"delivery_address_id"`
 	FoodItems         []FoodItemRequest `json:"food_items"`
@@ -59,9 +58,19 @@ func (cfg *ApiConfig) SubmitOrder(w http.ResponseWriter, r *http.Request) {
 	transactionErr := cfg.WithTransaction(r.Context(), func(qtx *database.Queries) error {
 
 		// Convert total cost
-		totalCost, convertErr := convertFloatToPgtypeNumeric(request.TotalCost)
-		if convertErr != nil {
-			return convertErr
+		// totalCost, convertErr := convertFloatToPgtypeNumeric(request.TotalCost)
+		// if convertErr != nil {
+		// 	return convertErr
+		// }
+
+		foodItemsByte, foodItemsErr := json.Marshal(request.FoodItems)
+		if foodItemsErr != nil {
+			return foodItemsErr
+		}
+
+		totalCost, totalCostErr := cfg.Db.CalculateTotalCost(r.Context(), foodItemsByte)
+		if totalCostErr != nil {
+			return totalCostErr
 		}
 
 		// Generate order number
@@ -118,10 +127,6 @@ func (cfg *ApiConfig) SubmitOrder(w http.ResponseWriter, r *http.Request) {
 
 // Validate order request
 func validateOrderRequest(request OrderRequest) error {
-	if request.TotalCost == 0.0 {
-		return errors.New("total cost must not be null and must be greater than zero")
-	}
-
 	if request.PaymentMethodId == 0 {
 		return errors.New("no payment method in request")
 	}
