@@ -7,7 +7,8 @@ CREATE TABLE orders(
     delivery_address_id BIGINT REFERENCES delivery_addresses(id) ON DELETE SET NULL,
     payment_method_id BIGINT REFERENCES payment_methods(id) ON DELETE SET NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL  
+    updated_at TIMESTAMP NOT NULL,
+    deleted_at TIMESTAMP
 );
 
 

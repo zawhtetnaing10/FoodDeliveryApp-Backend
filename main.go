@@ -72,6 +72,7 @@ func main() {
 	mux.HandleFunc("GET /api/get-delivery-addresses-and-payment-methods", apiCfg.GetDeliveryAddressAndPaymentMethodForUser)
 
 	mux.HandleFunc("POST /api/submit-order", apiCfg.SubmitOrder)
+	mux.HandleFunc("GET /api/get-orders-for-user", apiCfg.GetOrdersForUser)
 
 	// New Http Server
 	server := http.Server{

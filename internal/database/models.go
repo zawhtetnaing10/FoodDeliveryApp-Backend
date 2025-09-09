@@ -53,6 +53,7 @@ type Order struct {
 	PaymentMethodID   pgtype.Int8
 	CreatedAt         pgtype.Timestamp
 	UpdatedAt         pgtype.Timestamp
+	DeletedAt         pgtype.Timestamp
 }
 
 type PaymentMethod struct {

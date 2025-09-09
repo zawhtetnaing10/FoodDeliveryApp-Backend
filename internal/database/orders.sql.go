@@ -40,7 +40,7 @@ VALUES(
     NOW() AT TIME ZONE 'UTC',
     NOW() AT TIME ZONE 'UTC'
 )
-RETURNING id, total_cost, order_number, user_id, delivery_address_id, payment_method_id, created_at, updated_at
+RETURNING id, total_cost, order_number, user_id, delivery_address_id, payment_method_id, created_at, updated_at, deleted_at
 `
 
 type CreateOrderParams struct {
@@ -69,6 +69,225 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		&i.PaymentMethodID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
+}
+
+const getOrderById = `-- name: GetOrderById :many
+SELECT o.id AS order_id,
+ o.order_number AS order_number,
+ o.total_cost AS order_total_cost,
+ o.created_at AS order_created_at,
+ o.updated_at AS order_updated_at,
+ f.id AS food_item_id,
+ f.name AS food_item_name,
+ f.image_url AS food_item_image_url,
+ f.description AS food_item_description,
+ f.price AS food_item_price,
+ f.created_at AS food_item_created_at,
+ f.updated_at AS food_item_updated_at,
+ fho.quantity AS food_item_quantity,
+ da.id AS delivery_address_id,
+ da.street_address AS delivery_address,
+ da.created_at AS delivery_address_created_at,
+ da.updated_at AS delivery_address_updated_at,
+ pm.id AS payment_method_id,
+ pm.card_number AS payment_method_card_number,
+ pm.expiry_date AS payment_method_expiry_date,
+ pm.cvv AS payment_method_cvv,
+ pm.name_on_card AS payment_method_name_on_card,
+ pm.created_at AS payment_method_created_at,
+ pm.updated_at AS payment_method_updated_at
+FROM orders o 
+INNER JOIN food_items_has_orders fho
+ON fho.order_id = o.id
+INNER JOIN food_items f
+ON f.id = fho.food_item_id
+INNER JOIN delivery_addresses da
+ON o.delivery_address_id = da.id
+INNER JOIN payment_methods pm
+ON o.payment_method_id = pm.id
+WHERE o.id = $1
+`
+
+type GetOrderByIdRow struct {
+	OrderID                  int64
+	OrderNumber              string
+	OrderTotalCost           pgtype.Numeric
+	OrderCreatedAt           pgtype.Timestamp
+	OrderUpdatedAt           pgtype.Timestamp
+	FoodItemID               int64
+	FoodItemName             string
+	FoodItemImageUrl         string
+	FoodItemDescription      string
+	FoodItemPrice            pgtype.Numeric
+	FoodItemCreatedAt        pgtype.Timestamp
+	FoodItemUpdatedAt        pgtype.Timestamp
+	FoodItemQuantity         int32
+	DeliveryAddressID        int64
+	DeliveryAddress          string
+	DeliveryAddressCreatedAt pgtype.Timestamp
+	DeliveryAddressUpdatedAt pgtype.Timestamp
+	PaymentMethodID          int64
+	PaymentMethodCardNumber  string
+	PaymentMethodExpiryDate  string
+	PaymentMethodCvv         int32
+	PaymentMethodNameOnCard  string
+	PaymentMethodCreatedAt   pgtype.Timestamp
+	PaymentMethodUpdatedAt   pgtype.Timestamp
+}
+
+func (q *Queries) GetOrderById(ctx context.Context, id int64) ([]GetOrderByIdRow, error) {
+	rows, err := q.db.Query(ctx, getOrderById, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetOrderByIdRow
+	for rows.Next() {
+		var i GetOrderByIdRow
+		if err := rows.Scan(
+			&i.OrderID,
+			&i.OrderNumber,
+			&i.OrderTotalCost,
+			&i.OrderCreatedAt,
+			&i.OrderUpdatedAt,
+			&i.FoodItemID,
+			&i.FoodItemName,
+			&i.FoodItemImageUrl,
+			&i.FoodItemDescription,
+			&i.FoodItemPrice,
+			&i.FoodItemCreatedAt,
+			&i.FoodItemUpdatedAt,
+			&i.FoodItemQuantity,
+			&i.DeliveryAddressID,
+			&i.DeliveryAddress,
+			&i.DeliveryAddressCreatedAt,
+			&i.DeliveryAddressUpdatedAt,
+			&i.PaymentMethodID,
+			&i.PaymentMethodCardNumber,
+			&i.PaymentMethodExpiryDate,
+			&i.PaymentMethodCvv,
+			&i.PaymentMethodNameOnCard,
+			&i.PaymentMethodCreatedAt,
+			&i.PaymentMethodUpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getOrdersForUser = `-- name: GetOrdersForUser :many
+SELECT o.id AS order_id,
+ o.order_number AS order_number,
+ o.total_cost AS order_total_cost,
+ o.created_at AS order_created_at,
+ o.updated_at AS order_updated_at,
+ f.id AS food_item_id,
+ f.name AS food_item_name,
+ f.image_url AS food_item_image_url,
+ f.description AS food_item_description,
+ f.price AS food_item_price,
+ f.created_at AS food_item_created_at,
+ f.updated_at AS food_item_updated_at,
+ fho.quantity AS food_item_quantity,
+ da.id AS delivery_address_id,
+ da.street_address AS delivery_address,
+ da.created_at AS delivery_address_created_at,
+ da.updated_at AS delivery_address_updated_at,
+ pm.id AS payment_method_id,
+ pm.card_number AS payment_method_card_number,
+ pm.expiry_date AS payment_method_expiry_date,
+ pm.cvv AS payment_method_cvv,
+ pm.name_on_card AS payment_method_name_on_card,
+ pm.created_at AS payment_method_created_at,
+ pm.updated_at AS payment_method_updated_at
+FROM orders o 
+INNER JOIN food_items_has_orders fho
+ON fho.order_id = o.id
+INNER JOIN food_items f
+ON f.id = fho.food_item_id
+INNER JOIN delivery_addresses da
+ON o.delivery_address_id = da.id
+INNER JOIN payment_methods pm
+ON o.payment_method_id = pm.id
+WHERE o.user_id = $1
+`
+
+type GetOrdersForUserRow struct {
+	OrderID                  int64
+	OrderNumber              string
+	OrderTotalCost           pgtype.Numeric
+	OrderCreatedAt           pgtype.Timestamp
+	OrderUpdatedAt           pgtype.Timestamp
+	FoodItemID               int64
+	FoodItemName             string
+	FoodItemImageUrl         string
+	FoodItemDescription      string
+	FoodItemPrice            pgtype.Numeric
+	FoodItemCreatedAt        pgtype.Timestamp
+	FoodItemUpdatedAt        pgtype.Timestamp
+	FoodItemQuantity         int32
+	DeliveryAddressID        int64
+	DeliveryAddress          string
+	DeliveryAddressCreatedAt pgtype.Timestamp
+	DeliveryAddressUpdatedAt pgtype.Timestamp
+	PaymentMethodID          int64
+	PaymentMethodCardNumber  string
+	PaymentMethodExpiryDate  string
+	PaymentMethodCvv         int32
+	PaymentMethodNameOnCard  string
+	PaymentMethodCreatedAt   pgtype.Timestamp
+	PaymentMethodUpdatedAt   pgtype.Timestamp
+}
+
+func (q *Queries) GetOrdersForUser(ctx context.Context, userID pgtype.Int8) ([]GetOrdersForUserRow, error) {
+	rows, err := q.db.Query(ctx, getOrdersForUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetOrdersForUserRow
+	for rows.Next() {
+		var i GetOrdersForUserRow
+		if err := rows.Scan(
+			&i.OrderID,
+			&i.OrderNumber,
+			&i.OrderTotalCost,
+			&i.OrderCreatedAt,
+			&i.OrderUpdatedAt,
+			&i.FoodItemID,
+			&i.FoodItemName,
+			&i.FoodItemImageUrl,
+			&i.FoodItemDescription,
+			&i.FoodItemPrice,
+			&i.FoodItemCreatedAt,
+			&i.FoodItemUpdatedAt,
+			&i.FoodItemQuantity,
+			&i.DeliveryAddressID,
+			&i.DeliveryAddress,
+			&i.DeliveryAddressCreatedAt,
+			&i.DeliveryAddressUpdatedAt,
+			&i.PaymentMethodID,
+			&i.PaymentMethodCardNumber,
+			&i.PaymentMethodExpiryDate,
+			&i.PaymentMethodCvv,
+			&i.PaymentMethodNameOnCard,
+			&i.PaymentMethodCreatedAt,
+			&i.PaymentMethodUpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
