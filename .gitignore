@@ -27,6 +27,12 @@ go.work.sum
 # env file
 .env
 
+# docker run file
+docker_run.sh
+
+# docker build file
+docker_build.sh
+
 # Editor/IDE
 # .idea/
 # .vscode/

@@ -20,7 +20,7 @@ func main() {
 	// Load env file
 	godotenv.Load()
 
-	dbUrl := os.Getenv("DB_URL")
+	dbUrl := os.Getenv("DATABASE_URL")
 
 	// Connect to DB
 	pool, err := pgxpool.New(context.Background(), dbUrl)
@@ -33,8 +33,7 @@ func main() {
 	// Ping the connection
 	pingErr := pool.Ping(context.Background())
 	if pingErr != nil {
-		fmt.Printf("DB ping error %v", pingErr)
-		os.Exit(1)
+		fmt.Printf("DB ping error %v\n", pingErr)
 	}
 
 	// Create db queries instance
