@@ -40,6 +40,25 @@ func (q *Queries) CreateDeliveryAddress(ctx context.Context, arg CreateDeliveryA
 	return i, err
 }
 
+const doesDAExistsForUser = `-- name: DoesDAExistsForUser :one
+SELECT EXISTS (
+    SELECT id, street_address, created_at, updated_at, user_id FROM delivery_addresses 
+    WHERE user_id = $1 AND id = $2
+)
+`
+
+type DoesDAExistsForUserParams struct {
+	UserID pgtype.Int8
+	ID     int64
+}
+
+func (q *Queries) DoesDAExistsForUser(ctx context.Context, arg DoesDAExistsForUserParams) (bool, error) {
+	row := q.db.QueryRow(ctx, doesDAExistsForUser, arg.UserID, arg.ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getDeliveryAddressesForUser = `-- name: GetDeliveryAddressesForUser :many
 SELECT id, street_address, created_at, updated_at, user_id FROM delivery_addresses
 WHERE user_id = $1

@@ -11,3 +11,9 @@ RETURNING *;
 -- name: GetDeliveryAddressesForUser :many
 SELECT * FROM delivery_addresses
 WHERE user_id = $1;
+
+-- name: DoesDAExistsForUser :one
+SELECT EXISTS (
+    SELECT * FROM delivery_addresses 
+    WHERE user_id = $1 AND id = $2
+);

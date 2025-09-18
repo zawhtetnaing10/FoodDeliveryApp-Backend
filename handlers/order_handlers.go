@@ -75,6 +75,44 @@ func (cfg *ApiConfig) SubmitOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Does DA Exists
+	daExistsParams := database.DoesDAExistsForUserParams{
+		ID: request.DeliveryAddressId,
+		UserID: pgtype.Int8{
+			Int64: userId,
+			Valid: true,
+		},
+	}
+	daExists, daErr := cfg.Db.DoesDAExistsForUser(r.Context(), daExistsParams)
+	if daErr != nil {
+		cfg.LogError("DA Exists error in order", daErr)
+		RespondWithError(w, http.StatusInternalServerError, daErr.Error())
+		return
+	}
+	if !daExists {
+		RespondWithError(w, http.StatusBadRequest, "Delivery address does not exists for the user")
+		return
+	}
+
+	// Does PM Exists
+	pmExistsParams := database.DoesPMExistsForUserParams{
+		ID: request.PaymentMethodId,
+		UserID: pgtype.Int8{
+			Int64: userId,
+			Valid: true,
+		},
+	}
+	pmExists, pmErr := cfg.Db.DoesPMExistsForUser(r.Context(), pmExistsParams)
+	if pmErr != nil {
+		cfg.LogError("PM Exists error in order", pmErr)
+		RespondWithError(w, http.StatusInternalServerError, pmErr.Error())
+		return
+	}
+	if !pmExists {
+		RespondWithError(w, http.StatusBadRequest, "Payment Method does not exist for the user")
+		return
+	}
+
 	// Insert
 	insertedOrderId := int64(0)
 

@@ -55,6 +55,25 @@ func (q *Queries) CreatePaymentMethod(ctx context.Context, arg CreatePaymentMeth
 	return i, err
 }
 
+const doesPMExistsForUser = `-- name: DoesPMExistsForUser :one
+SELECT EXISTS (
+    SELECT id, card_number, expiry_date, cvv, name_on_card, created_at, updated_at, user_id FROM payment_methods 
+    WHERE user_id = $1 AND id = $2
+)
+`
+
+type DoesPMExistsForUserParams struct {
+	UserID pgtype.Int8
+	ID     int64
+}
+
+func (q *Queries) DoesPMExistsForUser(ctx context.Context, arg DoesPMExistsForUserParams) (bool, error) {
+	row := q.db.QueryRow(ctx, doesPMExistsForUser, arg.UserID, arg.ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getPaymentMethodsByUser = `-- name: GetPaymentMethodsByUser :many
 SELECT id, card_number, expiry_date, cvv, name_on_card, created_at, updated_at, user_id FROM payment_methods
 WHERE user_id = $1

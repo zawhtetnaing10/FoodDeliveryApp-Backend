@@ -14,3 +14,9 @@ RETURNING *;
 -- name: GetPaymentMethodsByUser :many
 SELECT * FROM payment_methods
 WHERE user_id = $1;
+
+-- name: DoesPMExistsForUser :one
+SELECT EXISTS (
+    SELECT * FROM payment_methods 
+    WHERE user_id = $1 AND id = $2
+);
