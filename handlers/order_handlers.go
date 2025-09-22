@@ -23,7 +23,6 @@ type foodItemRequest struct {
 	Quantity int   `json:"quantity"`
 }
 
-// TODO: -
 type orderResponse struct {
 	Id              int64                          `json:"id"`
 	OrderNumber     string                         `json:"order_number"`
