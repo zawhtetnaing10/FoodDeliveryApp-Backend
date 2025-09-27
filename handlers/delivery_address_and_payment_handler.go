@@ -23,7 +23,7 @@ type deliveryAddressRequest struct {
 type paymentMethodRequest struct {
 	CardNumber string `json:"card_number"`
 	ExpiryDate string `json:"expiry_date"`
-	CVV        int    `json:"cvv"`
+	CVV        int32  `json:"cvv"`
 	NameOnCard string `json:"name_on_card"`
 }
 
@@ -49,7 +49,7 @@ type paymentMethodResponse struct {
 	Id         int64     `json:"id"`
 	CardNumber string    `json:"card_number"`
 	ExpiryDate string    `json:"expiry_date"`
-	CVV        int       `json:"cvv"`
+	CVV        int32     `json:"cvv"`
 	NameOnCard string    `json:"name_on_card"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
@@ -84,7 +84,7 @@ func (cfg *ApiConfig) AddDeliveryAddressAndPaymentMethod(w http.ResponseWriter, 
 	paymentMethodParams := database.CreatePaymentMethodParams{
 		CardNumber: request.PaymentMethod.CardNumber,
 		ExpiryDate: request.PaymentMethod.ExpiryDate,
-		Cvv:        int32(request.PaymentMethod.CVV),
+		Cvv:        request.PaymentMethod.CVV,
 		NameOnCard: request.PaymentMethod.NameOnCard,
 		UserID: pgtype.Int8{
 			Int64: user_id,
@@ -101,7 +101,7 @@ func (cfg *ApiConfig) AddDeliveryAddressAndPaymentMethod(w http.ResponseWriter, 
 		Id:         paymentMethodDb.ID,
 		CardNumber: paymentMethodDb.CardNumber,
 		ExpiryDate: paymentMethodDb.ExpiryDate,
-		CVV:        int(paymentMethodDb.Cvv),
+		CVV:        paymentMethodDb.Cvv,
 		NameOnCard: paymentMethodDb.NameOnCard,
 		CreatedAt:  paymentMethodDb.CreatedAt.Time,
 		UpdatedAt:  paymentMethodDb.UpdatedAt.Time,
@@ -184,7 +184,7 @@ func (cfg *ApiConfig) GetDeliveryAddressAndPaymentMethodForUser(w http.ResponseW
 			Id:         paymentMethodDb.ID,
 			CardNumber: paymentMethodDb.CardNumber,
 			ExpiryDate: paymentMethodDb.ExpiryDate,
-			CVV:        int(paymentMethodDb.Cvv),
+			CVV:        paymentMethodDb.Cvv,
 			NameOnCard: paymentMethodDb.NameOnCard,
 			CreatedAt:  paymentMethodDb.CreatedAt.Time,
 			UpdatedAt:  paymentMethodDb.UpdatedAt.Time,

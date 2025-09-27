@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -14,7 +15,10 @@ func RespondWithJson(writer http.ResponseWriter, code int, payload any) {
 
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(code)
-	writer.Write(payloadData)
+	_, err = writer.Write(payloadData)
+	if err != nil {
+		log.Printf("Unable to write the response %v", err)
+	}
 }
 
 func RespondWithError(writer http.ResponseWriter, code int, msg string) {
@@ -30,11 +34,19 @@ func RespondWithError(writer http.ResponseWriter, code int, msg string) {
 	if err != nil {
 		writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		writer.WriteHeader(http.StatusInternalServerError)
-		writer.Write([]byte(err.Error()))
+		_, err = writer.Write([]byte(err.Error()))
+		if err != nil {
+			log.Printf("Unable to write the response %v", err)
+			return
+		}
 		return
 	}
 
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(code)
-	writer.Write(errData)
+	_, err = writer.Write(errData)
+	if err != nil {
+		log.Printf("Unable to write the response %v", err)
+		return
+	}
 }
