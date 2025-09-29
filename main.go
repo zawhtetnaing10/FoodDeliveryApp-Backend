@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/zawhtetnaing10/FoodDeliveryApp-Backend/handlers"
@@ -18,11 +20,11 @@ import (
 func main() {
 
 	// Load env file
-	if err := godotenv.Load(); err != nil {
-		os.Exit(1)
+	if err := godotenv.Load(".env"); err != nil {
+		log.Printf("warning: assuming default configuration. .env unreadable: %v", err)
 	}
 
-	// Port read from google cloud run
+	//Port read from google cloud run
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" // Will fall back to 8080 for local development
@@ -33,7 +35,7 @@ func main() {
 	// Connect to DB
 	pool, err := pgxpool.New(context.Background(), dbUrl)
 	if err != nil {
-		fmt.Printf("Unable to connect to db %v", err)
+		log.Printf("Unable to connect to db %v", err)
 		os.Exit(1)
 	}
 	defer pool.Close()
@@ -41,7 +43,7 @@ func main() {
 	// Ping the connection
 	pingErr := pool.Ping(context.Background())
 	if pingErr != nil {
-		fmt.Printf("DB ping error %v\n", pingErr)
+		log.Printf("DB ping error %v\n", pingErr)
 	}
 
 	// Create db queries instance
@@ -83,12 +85,12 @@ func main() {
 
 	// New Http Server
 	server := http.Server{
-		Addr:    ":" + port,
-		Handler: mux,
+		Addr:              ":" + port,
+		Handler:           mux,
+		ReadHeaderTimeout: time.Minute * 1,
 	}
 
-	if err := server.ListenAndServe(); err != nil {
-		apiCfg.LogError("Cannot serve endpoints", err)
-		os.Exit(1)
-	}
+	log.Printf("Serving on port: %s\n", port)
+
+	server.ListenAndServe()
 }
