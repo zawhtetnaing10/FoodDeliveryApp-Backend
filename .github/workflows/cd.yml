@@ -34,3 +34,6 @@ jobs:
 
       - name: "Publish to Google Artifacts Registry"
         run: "gcloud builds submit --tag asia-southeast1-docker.pkg.dev/fooddeliveryapp-472414/food-delivery-app-repo/fooddeliveryapp:latest ."
+
+      - name: "Deploy to Google Cloud Run"
+        run: "gcloud run deploy fooddeliveryapp --image asia-southeast1-docker.pkg.dev/fooddeliveryapp-472414/food-delivery-app-repo/fooddeliveryapp:latest --region asia-southeast1 --allow-unauthenticated --project fooddeliveryapp-472414 --max-instances=4"
