@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/zawhtetnaing10/FoodDeliveryApp-Backend/handlers"
@@ -18,7 +19,9 @@ import (
 func main() {
 
 	// Load env file
-	godotenv.Load()
+	if err := godotenv.Load(); err != nil {
+		os.Exit(1)
+	}
 
 	dbUrl := os.Getenv("DATABASE_URL")
 
@@ -75,9 +78,13 @@ func main() {
 
 	// New Http Server
 	server := http.Server{
-		Addr:    ":8080",
-		Handler: mux,
+		Addr:              ":8080",
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	server.ListenAndServe()
+	if err := server.ListenAndServe(); err != nil {
+		apiCfg.LogError("Cannot serve endpoints", err)
+		os.Exit(1)
+	}
 }

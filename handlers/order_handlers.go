@@ -20,7 +20,7 @@ type orderRequest struct {
 
 type foodItemRequest struct {
 	Id       int64 `json:"id"`
-	Quantity int   `json:"quantity"`
+	Quantity int32 `json:"quantity"`
 }
 
 type orderResponse struct {
@@ -157,7 +157,7 @@ func (cfg *ApiConfig) SubmitOrder(w http.ResponseWriter, r *http.Request) {
 			request := database.BulkInsertFoodItemsOrdersParams{
 				FoodItemID: foodItem.Id,
 				OrderID:    orderInDb.ID,
-				Quantity:   int32(foodItem.Quantity),
+				Quantity:   foodItem.Quantity,
 			}
 			orderFoodItemRequests = append(orderFoodItemRequests, request)
 		}
@@ -220,7 +220,7 @@ func (cfg *ApiConfig) SubmitOrder(w http.ResponseWriter, r *http.Request) {
 			Id:         firstItem.PaymentMethodID,
 			CardNumber: firstItem.PaymentMethodCardNumber,
 			ExpiryDate: firstItem.PaymentMethodExpiryDate,
-			CVV:        int(firstItem.PaymentMethodCvv),
+			CVV:        firstItem.PaymentMethodCvv,
 			NameOnCard: firstItem.PaymentMethodNameOnCard,
 			CreatedAt:  firstItem.PaymentMethodCreatedAt.Time,
 			UpdatedAt:  firstItem.PaymentMethodUpdatedAt.Time,
@@ -315,7 +315,7 @@ func (cfg *ApiConfig) GetOrdersForUser(w http.ResponseWriter, r *http.Request) {
 					Id:         orderRow.PaymentMethodID,
 					CardNumber: orderRow.PaymentMethodCardNumber,
 					ExpiryDate: orderRow.PaymentMethodExpiryDate,
-					CVV:        int(orderRow.PaymentMethodCvv),
+					CVV:        orderRow.PaymentMethodCvv,
 					NameOnCard: orderRow.PaymentMethodNameOnCard,
 					CreatedAt:  orderRow.PaymentMethodCreatedAt.Time,
 					UpdatedAt:  orderRow.PaymentMethodUpdatedAt.Time,
