@@ -23,6 +23,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Port read from google cloud run
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Will fall back to 8080 for local development
+	}
+
 	dbUrl := os.Getenv("DATABASE_URL")
 
 	// Connect to DB
@@ -78,9 +84,9 @@ func main() {
 
 	// New Http Server
 	server := http.Server{
-		Addr:              ":8080",
+		Addr:              ":" + port,
 		Handler:           mux,
-		ReadHeaderTimeout: 5 * time.Second,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	if err := server.ListenAndServe(); err != nil {
