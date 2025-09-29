@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/zawhtetnaing10/FoodDeliveryApp-Backend/handlers"
@@ -84,9 +83,8 @@ func main() {
 
 	// New Http Server
 	server := http.Server{
-		Addr:              ":" + port,
-		Handler:           mux,
-		ReadHeaderTimeout: 10 * time.Second,
+		Addr:    ":" + port,
+		Handler: mux,
 	}
 
 	if err := server.ListenAndServe(); err != nil {
