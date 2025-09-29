@@ -20,3 +20,17 @@ jobs:
 
       - name: Build the app
         run: ./build.sh
+
+      - id: "auth"
+        uses: "google-github-actions/auth@v2"
+        with:
+          credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
+
+      - name: "Use gcloud CLI"
+        run: "gcloud info"
+
+      - name: "Publish to Google Artifacts Registry"
+        run: "gcloud builds submit --tag asia-southeast1-docker.pkg.dev/fooddeliveryapp-472414/food-delivery-app-repo/fooddeliveryapp:latest ."
